@@ -50,7 +50,8 @@ spec:
                     container('maven') {
                         sh "mvn clean package -DskipTests"
                         sh "mkdir artifact"
-                        sh "cp **/*.jar artifact"
+                        sh "cp target/*.jar artifact"
+                        sh "echo test=${config.appName}"
                         sh "cp Dockerfile artifact"
                     }
                 }
