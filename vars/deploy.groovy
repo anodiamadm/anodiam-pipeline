@@ -1,9 +1,9 @@
-def call() {
+def call(Map config=[:], Closure body) {
     pipeline {
 
         environment {
             PROJECT = "anodiamgcpproject"
-            APP_NAME = "anodiam-login-service"
+            APP_NAME = config.appName
             TARGET_NAMESPACE = "dev-ns"
             CLUSTER_NAME = "cluster-anodiam-dev"
             CLUSTER_REGION = "us-central1"
@@ -74,6 +74,7 @@ spec:
                 }
             }
 
+            body()
         }
     }
 }
