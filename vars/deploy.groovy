@@ -74,7 +74,7 @@ spec:
                 }
             }
 
-            body()
+            body.call()
         }
     }
 }
