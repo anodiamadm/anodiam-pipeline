@@ -1,4 +1,4 @@
-def call(Map config=[:], Closure body) {
+def call(Map config=[:]) {
     pipeline {
 
         environment {
@@ -73,8 +73,6 @@ spec:
                     }
                 }
             }
-
-            body.call()
         }
     }
 }
