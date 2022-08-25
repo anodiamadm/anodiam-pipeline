@@ -2,18 +2,18 @@ def call(Map config=[:]) {
     pipeline {
 
         environment {
-            PROJECT = "anodiamgcpproject"
+            PROJECT = "${config.project}"
             APP_NAME = "${config.appName}"
-            TARGET_NAMESPACE = "dev-ns"
-            CLUSTER_NAME = "cluster-anodiam-dev"
-            CLUSTER_REGION = "us-central1"
-            CLUSTER_ZONE = "us-central1-c"
+            TARGET_NAMESPACE = "${config.namespace}"
+            CLUSTER_NAME = "${config.cluster}"
+            CLUSTER_REGION = "${config.region}"
+            CLUSTER_ZONE = "${config.zone}"
             IMAGE_TAG = "${CLUSTER_REGION}-docker.pkg.dev/${PROJECT}/anodiam-repo/${APP_NAME}:v${env.BUILD_NUMBER}"
         }
 
         agent {
             kubernetes {
-                label '${APP_NAME}'
+                label "${config.appName}"
                 defaultContainer 'jnlp'
                 yaml """
 apiVersion: v1
