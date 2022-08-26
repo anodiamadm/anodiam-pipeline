@@ -1,4 +1,4 @@
-def deploy(Map config=[:]) {
+def call(Map config=[:]) {
     pipeline {
 
         environment {
