@@ -25,8 +25,8 @@ spec:
   serviceAccountName: jenkins-admin
   automountServiceAccountToken: false
   containers:
-  - name: maven
-    image: gcr.io/cloud-builders/mvn
+  - name: npm
+    image: gcr.io/cloud-builders/npm
     command:
     - cat
     tty: true
@@ -47,10 +47,12 @@ spec:
         stages {
             stage('Build Artifact') {
                 steps {
-                    container('maven') {
-                        sh("mvn clean package")
+                    container('npm') {
+                        sh("npm install")
+                        sh("npm update")
+                        sh("npm run build")
                         sh("mkdir artifact")
-                        sh("cp target/*.jar artifact")
+                        sh("cp build/*.* artifact")
                         script {
                             if ("${config.manifestDir}") {
                                 sh("cp ${config.manifestDir}/Dockerfile artifact")

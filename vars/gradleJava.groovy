@@ -77,10 +77,10 @@ spec:
                         script {
                             if ("${config.manifestDir}") {
                                 sh("sed -i.bak 's#APP_IMAGE#${IMAGE_TAG}#' ${config.manifestDir}/*.yaml")
-                                sh("kubectl apply -n dev-ns -f ${config.manifestDir}")
+                                sh("kubectl apply -n ${TARGET_NAMESPACE} -f ${config.manifestDir}")
                             } else {
                                 sh("sed -i.bak 's#APP_IMAGE#${IMAGE_TAG}#' ./k8s/*.yaml")
-                                sh("kubectl apply -n ${IMAGE_TAG} -f ./k8s")
+                                sh("kubectl apply -n ${TARGET_NAMESPACE} -f ./k8s")
                             }
                         }
                     }
