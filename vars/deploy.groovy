@@ -48,7 +48,7 @@ spec:
             stage('Build Artifact') {
                 steps {
                     container('maven') {
-                        sh("mvn clean package -DskipTests")
+                        sh("mvn clean package")
                         sh("mkdir artifact")
                         sh("cp target/*.jar artifact")
                         script {
