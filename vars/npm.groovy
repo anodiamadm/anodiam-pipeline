@@ -52,7 +52,7 @@ spec:
                         sh("npm update")
                         sh("npm run build")
                         sh("mkdir artifact")
-                        sh("cp build/*.* artifact")
+                        sh("cp build/* artifact")
                         script {
                             if ("${config.manifestDir}") {
                                 sh("cp ${config.manifestDir}/Dockerfile artifact")
