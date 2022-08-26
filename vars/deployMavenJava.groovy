@@ -1,4 +1,4 @@
-def deployMavenJava(Map config=[:]) {
+def deploy(Map config=[:]) {
     pipeline {
 
         environment {

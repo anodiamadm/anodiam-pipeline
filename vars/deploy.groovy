@@ -1,3 +1,3 @@
 def call(Map config=[:]) {
-    deployMavenJava(config)
+    deployMavenJava.deploy(config)
 }
