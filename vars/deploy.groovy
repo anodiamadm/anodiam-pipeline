@@ -48,18 +48,21 @@ spec:
             stage('Build Artifact') {
                 steps {
                     container('maven') {
-                        sh "mvn clean package -DskipTests"
-                        sh "mkdir artifact"
-                        sh "cp target/*.jar artifact"
-                        sh "echo test=${config.appName}"
-                        sh "cp Dockerfile artifact"
+                        sh("mvn clean package -DskipTests")
+                        sh("mkdir artifact")
+                        sh("cp target/*.jar artifact")
+                        if ("${config.manifestDir}"?.trim()) {
+                            sh("cp Dockerfile artifact")
+                        } else {
+                            sh("cp ${config.manifestDir}/Dockerfile artifact")
+                        }
                     }
                 }
             }
             stage('Push image with Container Builder') {
                 steps {
                     container('gcloud') {
-                        sh "PYTHONUNBUFFERED=1 gcloud builds submit -t ${IMAGE_TAG} ./artifact"
+                        sh("PYTHONUNBUFFERED=1 gcloud builds submit -t ${IMAGE_TAG} ./artifact")
                     }
                 }
             }
@@ -68,9 +71,14 @@ spec:
                 when { branch 'feature/**' }
                 steps {
                     container('kubectl') {
-                        sh "PYTHONUNBUFFERED=1 gcloud container clusters get-credentials ${CLUSTER_NAME} --zone=${CLUSTER_ZONE}"
-                        sh("sed -i.bak 's#APP_IMAGE#${IMAGE_TAG}#' ./k8s/*.yaml")
-                        sh 'kubectl apply -n dev-ns -f ./k8s'
+                        sh("PYTHONUNBUFFERED=1 gcloud container clusters get-credentials ${CLUSTER_NAME} --zone=${CLUSTER_ZONE}")
+                        if ("${config.manifestDir}"?.trim()) {
+                            sh("sed -i.bak 's#APP_IMAGE#${IMAGE_TAG}#' ${config.manifestDir}/*.yaml")
+                            sh("kubectl apply -n ${IMAGE_TAG} -f ./k8s")
+                        } else {
+                            sh("sed -i.bak 's#APP_IMAGE#${IMAGE_TAG}#' ${config.manifestDir}/*.yaml")
+                            sh("kubectl apply -n dev-ns -f ${config.manifestDir}")
+                        }
                     }
                 }
             }
