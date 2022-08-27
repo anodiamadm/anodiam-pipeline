@@ -20,7 +20,7 @@ apiVersion: v1
 kind: Pod
 metadata:
 labels:
-  component: cicd-maven-java
+  component: cicd-nodejs
 spec:
   serviceAccountName: jenkins-admin
   automountServiceAccountToken: false
@@ -49,7 +49,6 @@ spec:
                 steps {
                     container('npm') {
                         sh("npm install")
-                        sh("npm update")
                         sh("npm run build")
                         sh("mkdir artifact")
                         sh("cp -r build/* artifact")

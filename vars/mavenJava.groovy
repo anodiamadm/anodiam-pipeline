@@ -20,7 +20,7 @@ apiVersion: v1
 kind: Pod
 metadata:
 labels:
-  component: cicd-maven-java
+  component: cicd-maven
 spec:
   serviceAccountName: jenkins-admin
   automountServiceAccountToken: false
