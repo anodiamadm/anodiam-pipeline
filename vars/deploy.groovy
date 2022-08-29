@@ -6,7 +6,11 @@ def call() {
                 steps {
                     script {
                         def files = findFiles(glob: 'cicd.yaml')
-                        println(files.length)
+                        if(files.length > 0) {
+                            println('Found ' + files[0])
+                            datas = readYaml (file: files[0])
+                            println('application.name= ' + datas.application.name)
+                        }
                     }
                 }
             }
