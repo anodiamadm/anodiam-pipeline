@@ -1,26 +1,23 @@
 def call() {
-    def appName = ''
+    def config=[:]
+    try {
+        def files = findFiles(glob: 'cicd.yaml')
+        if (files.length > 0) {
+            config = readYaml(file: "${WORKSPACE}/" + files[0])
+        } else {
+            error "Pipeline not configured. Please configure using cicd.yaml"
+        }
+    } catch(Exception e) {
+        error "Pipeline failed, please check logs..."
+    }
+
     pipeline {
         agent any;
         stages {
-            stage('init') {
-                steps {
-                    script {
-                        def files = findFiles(glob: 'cicd.yaml')
-                        if (files.length > 0) {
-                            println('Found ' + files[0])
-                            def datas = readYaml(file: "${WORKSPACE}/" + files[0])
-                            appName = datas.application.name
-                        } else {
-                            error "Pipeline not configured. Please configure using cicd.yaml"
-                        }
-                    }
-                }
-            }
             stage('test') {
                 steps {
                     script {
-                        println('application.name= ' + appName)
+                        println('application.name=' + config.application.name)
                     }
                 }
             }
