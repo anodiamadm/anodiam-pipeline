@@ -23,9 +23,9 @@ def call() {
             }
             stage('test feature') {
                 when { branch 'feature/**' }
-                def envConfig = config.branch.feature
                 steps {
                     script {
+                        def envConfig = config.branch.feature
                         println('Application Name=' + config.application.name)
                         println('namespace=' + envConfig.namespace)
                     }
