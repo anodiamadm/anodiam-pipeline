@@ -1,4 +1,15 @@
 def call() {
-    def files = findFiles(glob: 'cicd.yaml')
-    println(files.length)
+    pipeline {
+        agent any;
+        stages {
+            stage('test') {
+                steps {
+                    script {
+                        def files = findFiles(glob: 'cicd.yaml')
+                        println(files.length)
+                    }
+                }
+            }
+        }
+    }
 }
