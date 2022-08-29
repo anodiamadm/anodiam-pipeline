@@ -48,7 +48,7 @@ spec:
             stage('Build Artifact') {
                 steps {
                     container('npm') {
-                        sh("npm install")
+                        sh("npm install --omit=dev")
                         sh("npm run build")
                         sh("mkdir artifact")
                         sh("cp -r build/* artifact")
