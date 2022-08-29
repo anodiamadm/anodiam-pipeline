@@ -14,7 +14,6 @@ def call() {
                 }
             }
             stage('test') {
-                echo
                 steps {
                     script {
                         println('application.name= ' + appName)
