@@ -52,11 +52,61 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                         clusterRegion = deploymentConfig.region
                         clusterZone = deploymentConfig.zone
                         imageTag = clusterRegion + "-docker.pkg.dev/" + project + "/anodiam-repo/" + appName + ":v" + env.BUILD_NUMBER
-                        println("imageTag=" + imageTag)
                     }
                 }
             }
+            stage('Build Artifact') {
+                steps {
+                    container("${buildPack}") {
+                        sh("mkdir artifact")
+                        script {
+                            if('maven' == buildPack) {
+                                sh("mvn clean package")
+                                sh("cp target/*.jar artifact")
+                            } else if('gradle' == buildPack) {
+                                sh("gradle clean build")
+                                sh("cp build/libs/*.jar artifact")
+                            } else if('npm' == buildPack) {
+                                sh("npm install --omit=dev")
+                                sh("npm run build")
+                                sh("cp -r build/* artifact")
+                            } else {
+                                error "Buildpack not defined/implemented"
+                            }
 
+                            def envConfig = config.branch.feature
+                            if (envConfig.manifestDir) {
+                                sh("cp ${envConfig.manifestDir}/Dockerfile artifact")
+                            } else {
+                                sh("cp Dockerfile artifact")
+                            }
+                        }
+                    }
+                }
+            }
+            stage('Build And Push Image') {
+                steps {
+                    container('gcloud') {
+                        sh("PYTHONUNBUFFERED=1 gcloud builds submit -t ${imageTag} ./artifact")
+                    }
+                }
+            }
+            stage('Deploy Application') {
+                steps {
+                    container('kubectl') {
+                        sh("PYTHONUNBUFFERED=1 gcloud container clusters get-credentials ${clusterName} --zone=${clusterZone}")
+                        script {
+                            if ("${manifestDir}") {
+                                sh("sed -i.bak 's#APP_IMAGE#${imageTag}#' ${manifestDir}/*.yaml")
+                                sh("kubectl apply -n ${namespace} -f ${manifestDir}")
+                            } else {
+                                sh("sed -i.bak 's#APP_IMAGE#${imageTag}#' ./k8s/*.yaml")
+                                sh("kubectl apply -n ${namespace} -f ./k8s")
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
