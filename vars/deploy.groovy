@@ -36,10 +36,11 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
             stage('Environment Configuration') {
                 steps {
                     script {
-                        def branchName = scm.branches[0].name.split("/")[1]
-                        println("Branch Name = " + branchName)
+                        def branchNamePrefix = env.BRANCH_NAME.split("/")[0]
+                        println("Branch Name = " + branchNamePrefix)
                         println("Branch Name(ENV) = " + env.BRANCH_NAME)
-                        //def envConfig = config.branch.feature
+                        def envConfig = config.branch['branchNamePrefix']
+                        println("envConfig=" + envConfig)
                         //appName = config.application.name
                         //imageTag = "${CLUSTER_REGION}-docker.pkg.dev/${PROJECT}/anodiam-repo/${APP_NAME}:v${env.BUILD_NUMBER}"
                     }
