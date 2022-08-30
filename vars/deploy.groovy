@@ -13,7 +13,7 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
             kubernetes {
                 label "${appName}"
                 defaultContainer 'jnlp'
-                yaml "${podTemplate}"
+                yaml """${podTemplate}"""
             }
         }
 
