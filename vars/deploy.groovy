@@ -56,16 +56,18 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                                 println("Selected deployment type = " + deploymentType)
                             } else {
                                 println("Selected deployment type = " + deploymentType)
-                                def currentImage = sh(script: "kubectl get deployment " + appName + " -n ${deploymentConfig.namespace} -o=jsonpath='{\$.spec.template.spec.containers[:1].image}' || true", returnStdout: true)
-                                if(!currentImage.startsWith('Error')) {
-                                    println("Found app image = " + currentImage)
-                                    def rollbackImageTag = input(id: 'rollbackImageTag', message: 'Please Select Image Tag to Rollback',
-                                            parameters: [[$class: 'ChoiceParameterDefinition', description:'', name:'', choices: "New Build" + "\n" + currentImage]
-                                            ])
-                                    println("Selected app image = " + rollbackImageTag)
-                                } else {
-                                    error currentImage
-                                }
+                                def status = sh(returnStatus: true, returnStdout: true, returnStderr: true, script: "kubectl get deployment " + appName + " -n ${deploymentConfig.namespace} -o=jsonpath='{\$.spec.template.spec.containers[:1].image}'")
+                                println("status=" + status)
+                                //def currentImage = sh(script: "kubectl get deployment " + appName + " -n ${deploymentConfig.namespace} -o=jsonpath='{\$.spec.template.spec.containers[:1].image}' || true", returnStdout: true)
+                                //if(!currentImage.startsWith('Error')) {
+                                //    println("Found app image = " + currentImage)
+                                //    def rollbackImageTag = input(id: 'rollbackImageTag', message: 'Please Select Image Tag to Rollback',
+                                //            parameters: [[$class: 'ChoiceParameterDefinition', description:'', name:'', choices: "New Build" + "\n" + currentImage]
+                                //            ])
+                                //    println("Selected app image = " + rollbackImageTag)
+                                //} else {
+                                //    error currentImage
+                                //}
                             }
                         }
                     }
