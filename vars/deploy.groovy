@@ -11,6 +11,11 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
     def imageTag = ''
 
     pipeline {
+
+        options {
+            buildDiscarder(logRotator(numToKeepStr: '5'))
+        }
+
         agent {
             kubernetes {
                 label "${appName}"
