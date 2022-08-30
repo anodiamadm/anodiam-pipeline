@@ -74,7 +74,6 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                                 error "Buildpack not defined/implemented"
                             }
 
-                            def envConfig = config.branch.feature
                             if ("${manifestDir}") {
                                 sh("cp ${manifestDir}/Dockerfile artifact")
                             } else {
