@@ -3,26 +3,24 @@ def call() {
     def buildPack = 'maven'
     def podTemplate = """"""
 
-    script {
-        try {
-            if (fileExists('cicd.yaml')) {
-                config = readYaml(file: "${WORKSPACE}/cicd.yaml")
-                buildPack = config.application.buildPack
-                if('maven' == buildPack) {
-                    podTemplate = getMavenPodTemplate()
-                } else if('gradle' == buildPack) {
-                    podTemplate = getGradlePodTemplate()
-                } else if('npm' == buildPack) {
-                    podTemplate = getNPMPodTemplate()
-                } else {
-                    error "Buildpack not defined/implemented"
-                }
+    try {
+        if (fileExists('cicd.yaml')) {
+            config = readYaml(file: "${WORKSPACE}/cicd.yaml")
+            buildPack = config.application.buildPack
+            if('maven' == buildPack) {
+                podTemplate = getMavenPodTemplate()
+            } else if('gradle' == buildPack) {
+                podTemplate = getGradlePodTemplate()
+            } else if('npm' == buildPack) {
+                podTemplate = getNPMPodTemplate()
             } else {
-                error "Pipeline not configured. Please configure using cicd.yaml"
+                error "Buildpack not defined/implemented"
             }
-        } catch(Exception e) {
-            error "Pipeline failed, ERROR: " + e.getMessage()
+        } else {
+            error "Pipeline not configured. Please configure using cicd.yaml"
         }
+    } catch(Exception e) {
+        error "Pipeline failed, ERROR: " + e.getMessage()
     }
 
     pipeline {
