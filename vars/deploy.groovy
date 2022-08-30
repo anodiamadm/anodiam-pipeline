@@ -1,5 +1,6 @@
 def call(String buildPack = 'maven', String appName = 'app-name-not-specified') {
-    def config=[:]
+    def manifestConfig=[:]
+    def deploymentConfig=[:]
     def podTemplate = getPodTemplate(buildPack)
     def project = ''
     def namespace = ''
@@ -23,7 +24,7 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                     script {
                         try {
                             if (fileExists('cicd.yaml')) {
-                                config = readYaml(file: "${WORKSPACE}/cicd.yaml")
+                                manifestConfig = readYaml(file: "${WORKSPACE}/cicd.yaml")
                             } else {
                                 error "Pipeline not configured. Please configure using cicd.yaml"
                             }
@@ -37,14 +38,12 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                 steps {
                     script {
                         def branchNamePrefix = env.BRANCH_NAME.split("/")[0]
-                        println("Branch Name = " + branchNamePrefix)
-                        println("Branch Name(ENV) = " + env.BRANCH_NAME)
-                        def envConfig = config.branch[branchNamePrefix]
-                        println("envConfig=" + envConfig)
+                        deploymentConfig = manifestConfig.branch[branchNamePrefix]
+                        println("deploymentConfig=" + deploymentConfig)
                         //appName = config.application.name
                         //imageTag = "${CLUSTER_REGION}-docker.pkg.dev/${PROJECT}/anodiam-repo/${APP_NAME}:v${env.BUILD_NUMBER}"
                     }
-                    sh 'printenv'
+                    //sh 'printenv'
                 }
             }
 
