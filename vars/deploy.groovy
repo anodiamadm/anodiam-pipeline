@@ -67,7 +67,7 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                                 sh("gradle clean build")
                                 sh("cp build/libs/*.jar artifact")
                             } else if('npm' == buildPack) {
-                                sh("npm install --omit=dev")
+                                //sh("npm install --omit=dev")
                                 sh("npm run build")
                                 sh("cp -r build/* artifact")
                             } else {
