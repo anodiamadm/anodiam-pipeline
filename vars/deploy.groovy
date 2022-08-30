@@ -124,7 +124,7 @@ def call(String buildPack = 'maven') {
     }
 }
 
-static String getPodTemplate(String buildPack = 'maven') {
+String getPodTemplate(String buildPack = 'maven') {
     if('maven' == buildPack) {
         return getMavenPodTemplate()
     } else if('gradle' == buildPack) {
@@ -136,7 +136,7 @@ static String getPodTemplate(String buildPack = 'maven') {
     }
 }
 
-static String getMavenPodTemplate() {
+String getMavenPodTemplate() {
     return """
 apiVersion: v1
 kind: Pod
@@ -165,7 +165,7 @@ spec:
 """
 }
 
-static String getGradlePodTemplate() {
+String getGradlePodTemplate() {
     return """
 apiVersion: v1
 kind: Pod
@@ -194,7 +194,7 @@ spec:
 """
 }
 
-static String getNPMPodTemplate() {
+String getNPMPodTemplate() {
     return """
 apiVersion: v1
 kind: Pod
