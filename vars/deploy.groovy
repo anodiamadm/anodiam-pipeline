@@ -19,12 +19,11 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
         }
 
         stages {
-            stage('Deployment/Rollback ?') {
+            stage('Deployment/Rollback') {
                 steps {
                     script {
                         def userInput = input(id: 'deploymentType', message: 'Please Select Deployment Type',
-                                parameters: [[$class: 'ChoiceParameterDefinition', defaultValue: 'Deployment',
-                                              description:'Deployment', name:'deploymentType', choices: "Deployment\nRollback"]
+                                parameters: [[$class: 'ChoiceParameterDefinition', description:'Deployment', name:'', choices: "Deployment\nRollback"]
                                 ])
 
                         if(userInput == 'Deployment') {
