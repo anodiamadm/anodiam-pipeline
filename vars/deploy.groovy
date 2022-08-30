@@ -2,12 +2,6 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
     def manifestConfig=[:]
     def deploymentConfig=[:]
     def podTemplate = getPodTemplate(buildPack)
-    def project = ''
-    def namespace = ''
-    def clusterName = ''
-    def clusterRegion = ''
-    def clusterZone = ''
-    def manifestDir = '.'
     def imageTag = ''
 
     pipeline {
@@ -45,13 +39,7 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                     script {
                         def branchNamePrefix = env.BRANCH_NAME.split("/")[0]
                         deploymentConfig = manifestConfig.branch[branchNamePrefix]
-                        project = deploymentConfig.project
-                        namespace = deploymentConfig.namespace
-                        manifestDir = deploymentConfig.manifestDir
-                        clusterName = deploymentConfig.cluster
-                        clusterRegion = deploymentConfig.region
-                        clusterZone = deploymentConfig.zone
-                        imageTag = clusterRegion + "-docker.pkg.dev/" + project + "/anodiam-repo/" + appName + ":v" + env.BUILD_NUMBER
+                        imageTag = deploymentConfig.region + "-docker.pkg.dev/" + deploymentConfig.project + "/anodiam-repo/" + appName + ":v" + env.BUILD_NUMBER
                     }
                 }
             }
@@ -67,15 +55,15 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                                 sh("gradle clean build")
                                 sh("cp build/libs/*.jar artifact")
                             } else if('npm' == buildPack) {
-                                //sh("npm install --omit=dev")
+                                sh("npm install --omit=dev")
                                 sh("npm run build")
                                 sh("cp -r build/* artifact")
                             } else {
                                 error "Buildpack not defined/implemented"
                             }
 
-                            if ("${manifestDir}") {
-                                sh("cp ${manifestDir}/Dockerfile artifact")
+                            if ("${deploymentConfig.manifestDir}") {
+                                sh("cp ${deploymentConfig.manifestDir}/Dockerfile artifact")
                             } else {
                                 sh("cp Dockerfile artifact")
                             }
@@ -93,14 +81,14 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
             stage('Deploy Application') {
                 steps {
                     container('kubectl') {
-                        sh("PYTHONUNBUFFERED=1 gcloud container clusters get-credentials ${clusterName} --zone=${clusterZone}")
+                        sh("PYTHONUNBUFFERED=1 gcloud container clusters get-credentials ${deploymentConfig.cluster} --zone=${deploymentConfig.zone}")
                         script {
-                            if ("${manifestDir}") {
-                                sh("sed -i.bak 's#APP_IMAGE#${imageTag}#' ${manifestDir}/*.yaml")
-                                sh("kubectl apply -n ${namespace} -f ${manifestDir}")
+                            if ("${deploymentConfig.manifestDir}") {
+                                sh("sed -i.bak 's#APP_IMAGE#${imageTag}#' ${deploymentConfig.manifestDir}/*.yaml")
+                                sh("kubectl apply -n ${deploymentConfig.namespace} -f ${deploymentConfig.manifestDir}")
                             } else {
                                 sh("sed -i.bak 's#APP_IMAGE#${imageTag}#' ./k8s/*.yaml")
-                                sh("kubectl apply -n ${namespace} -f ./k8s")
+                                sh("kubectl apply -n ${deploymentConfig.namespace} -f ./k8s")
                             }
                         }
                     }
