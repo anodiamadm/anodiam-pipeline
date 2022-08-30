@@ -1,6 +1,6 @@
 def call(String buildPack = 'maven') {
     def config=[:]
-    def podTemplate = """"""
+    def podTemplate = getPodTemplate(buildPack)
     def project = ''
     def appName = ''
     def namespace = ''
@@ -14,7 +14,7 @@ def call(String buildPack = 'maven') {
             kubernetes {
                 label "${config.appName}"
                 defaultContainer 'jnlp'
-                yaml getPodTemplate(buildPack)
+                yaml "${podTemplate}"
             }
         }
 
