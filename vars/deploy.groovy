@@ -75,8 +75,8 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                             }
 
                             def envConfig = config.branch.feature
-                            if (envConfig.manifestDir) {
-                                sh("cp ${envConfig.manifestDir}/Dockerfile artifact")
+                            if ("${manifestDir}") {
+                                sh("cp ${manifestDir}/Dockerfile artifact")
                             } else {
                                 sh("cp Dockerfile artifact")
                             }
