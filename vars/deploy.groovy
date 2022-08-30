@@ -19,22 +19,6 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
         }
 
         stages {
-            stage('Deployment/Rollback') {
-                steps {
-                    script {
-                        def userInput = input(id: 'deploymentType', message: 'Please Select Deployment Type',
-                                parameters: [[$class: 'ChoiceParameterDefinition', description:'Deployment', name:'', choices: "Deployment\nRollback"]
-                                ])
-
-                        if(userInput == 'Deployment') {
-                            println("Selected deployment type = " + userInput)
-                        } else {
-                            println("Selected deployment type = " + userInput)
-                        }
-                    }
-                }
-
-            }
             stage('Init') {
                 steps {
                     script {
@@ -58,6 +42,35 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                         imageTag = deploymentConfig.region + "-docker.pkg.dev/" + deploymentConfig.project + "/anodiam-repo/" + appName + ":v" + env.BUILD_NUMBER
                     }
                 }
+            }
+            stage('Deployment/Rollback') {
+                steps {
+                    container('kubectl') {
+                        sh("PYTHONUNBUFFERED=1 gcloud container clusters get-credentials ${deploymentConfig.cluster} --zone=${deploymentConfig.zone}")
+                        script {
+                            def deploymentType = input(id: 'deploymentType', message: 'Please Select Deployment Type',
+                                    parameters: [[$class: 'ChoiceParameterDefinition', description:'', name:'', choices: "Deployment\nRollback"]
+                                    ])
+
+                            if(deploymentType == 'Deployment') {
+                                println("Selected deployment type = " + deploymentType)
+                            } else {
+                                println("Selected deployment type = " + deploymentType)
+                                def currentImage = sh(script: "kubectl get deployment " + appName + " -n ${deploymentConfig.namespace} -o=jsonpath='{\$.spec.template.spec.containers[:1].image}'", returnStdout: true)
+                                if(!currentImage.startsWith('Error')) {
+                                    println("Found app image = " + currentImage)
+                                    def rollbackImageTag = input(id: 'rollbackImageTag', message: 'Please Select Image Tag to Rollback',
+                                            parameters: [[$class: 'ChoiceParameterDefinition', description:'', name:'', choices: "New Build" + "\n" + currentImage]
+                                            ])
+                                    println("Selected app image = " + rollbackImageTag)
+                                } else {
+                                    error currentImage
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
             stage('Build Artifact') {
                 steps {
