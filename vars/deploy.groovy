@@ -40,6 +40,7 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                         println("Branch Name = " + branchNamePrefix)
                         println("Branch Name(ENV) = " + env.BRANCH_NAME)
                         def envConfig = config.branch['branchNamePrefix']
+                        println("config=" + config)
                         println("envConfig=" + envConfig)
                         //appName = config.application.name
                         //imageTag = "${CLUSTER_REGION}-docker.pkg.dev/${PROJECT}/anodiam-repo/${APP_NAME}:v${env.BUILD_NUMBER}"
