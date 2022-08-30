@@ -7,6 +7,7 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
     def clusterName = ''
     def clusterRegion = ''
     def clusterZone = ''
+    def manifestDir = '.'
     def imageTag = ''
 
     pipeline {
@@ -39,11 +40,15 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                     script {
                         def branchNamePrefix = env.BRANCH_NAME.split("/")[0]
                         deploymentConfig = manifestConfig.branch[branchNamePrefix]
-                        println("deploymentConfig=" + deploymentConfig)
-                        //appName = config.application.name
-                        //imageTag = "${CLUSTER_REGION}-docker.pkg.dev/${PROJECT}/anodiam-repo/${APP_NAME}:v${env.BUILD_NUMBER}"
+                        project = deploymentConfig.project
+                        namespace = deploymentConfig.namespace
+                        manifestDir = deploymentConfig.manifestDir
+                        clusterName = deploymentConfig.cluster
+                        clusterRegion = deploymentConfig.region
+                        clusterZone = deploymentConfig.zone
+                        imageTag = clusterRegion + "-docker.pkg.dev/" + project + "/anodiam-repo/" + appName + ":v" + env.BUILD_NUMBER
+                        println("imageTag=" + imageTag)
                     }
-                    //sh 'printenv'
                 }
             }
 
