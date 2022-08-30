@@ -124,6 +124,7 @@ def call(String buildPack = 'maven') {
     }
 }
 
+@NonCPS
 def getPodTemplate(String buildPack = 'maven') {
     if('maven' == buildPack) {
         return getMavenPodTemplate()
@@ -136,6 +137,7 @@ def getPodTemplate(String buildPack = 'maven') {
     }
 }
 
+@NonCPS
 def getMavenPodTemplate() {
     return """
 apiVersion: v1
@@ -165,6 +167,7 @@ spec:
 """
 }
 
+@NonCPS
 def getGradlePodTemplate() {
     return """
 apiVersion: v1
@@ -194,6 +197,7 @@ spec:
 """
 }
 
+@NonCPS
 def getNPMPodTemplate() {
     return """
 apiVersion: v1
