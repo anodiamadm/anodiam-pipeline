@@ -57,28 +57,37 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                             } else {
                                 println("Selected deployment type = " + deploymentType)
                                 def currentImage = sh(script: "kubectl get deployment " + appName + " -n ${deploymentConfig.namespace} -o=jsonpath='{\$.spec.template.spec.containers[:1].image}' || true", returnStdout: true)
-                                if(!currentImage.startsWith('Error')) {
+                                def rollbackImageTag
+                                if(currentImage?.trim()) {
                                     println("Found app image = " + currentImage)
-                                    def rollbackImageTag = input(id: 'rollbackImageTag', message: 'Please Select Image Tag to Rollback',
+                                    rollbackImageTag = input(id: 'rollbackImageTag', message: 'Please Select Image Tag to Rollback',
                                             parameters: [[$class: 'ChoiceParameterDefinition', description:'', name:'', choices: "Build New Image" + "\n" + currentImage + "\nAnother Image"]
                                             ])
-                                    if(rollbackImageTag == "Build New Image") {
-                                        imageTag = deploymentConfig.region + "-docker.pkg.dev/" + deploymentConfig.project + "/anodiam-repo/" + appName + ":v" + env.BUILD_NUMBER
-                                        buildRequired = true
-                                    } else if(rollbackImageTag == "Another Image") {
-                                        def rollbackCustomImageTag = input(id: 'rollbackCustomImageTag', message: 'Please Select Custom Image Tag to Rollback',
-                                                parameters: [[$class: 'StringParameterDefinition', description:'', name:'', defaultValue: currentImage]
-                                                ])
-                                        imageTag = rollbackCustomImageTag
-                                        buildRequired = false
-                                    } else {
-                                        imageTag = rollbackImageTag
-                                        buildRequired = false
-                                    }
-                                    println("Selected app image = " + imageTag)
                                 } else {
-                                    error currentImage
+                                    rollbackImageTag = input(id: 'rollbackImageTag', message: 'Please Select Image Tag to Rollback',
+                                            parameters: [[$class: 'ChoiceParameterDefinition', description:'', name:'', choices: "Build New Image\nAnother Image"]
+                                            ])
                                 }
+                                if(rollbackImageTag == "Build New Image") {
+                                    imageTag = deploymentConfig.region + "-docker.pkg.dev/" + deploymentConfig.project + "/anodiam-repo/" + appName + ":v" + env.BUILD_NUMBER
+                                    buildRequired = true
+                                } else if(rollbackImageTag == "Another Image") {
+                                    def defaultImageTagValue
+                                    if(currentImage?.trim()) {
+                                        defaultImageTagValue = currentImage.trim()
+                                    } else {
+                                        defaultImageTagValue = ''
+                                    }
+                                    def rollbackCustomImageTag = input(id: 'rollbackCustomImageTag', message: 'Please Select Custom Image Tag to Rollback',
+                                            parameters: [[$class: 'StringParameterDefinition', description:'', name:'', defaultValue: defaultImageTagValue]
+                                            ])
+                                    imageTag = rollbackCustomImageTag
+                                    buildRequired = false
+                                } else {
+                                    imageTag = rollbackImageTag
+                                    buildRequired = false
+                                }
+                                println("Selected app image = " + imageTag)
                             }
                         }
                     }
