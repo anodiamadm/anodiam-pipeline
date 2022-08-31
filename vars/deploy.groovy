@@ -3,6 +3,7 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
     def deploymentConfig=[:]
     def podTemplate = getPodTemplate(buildPack)
     def imageTag = ''
+    def buildRequired = true
 
     pipeline {
 
@@ -39,7 +40,6 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                     script {
                         def branchNamePrefix = env.BRANCH_NAME.split("/")[0]
                         deploymentConfig = manifestConfig.branch[branchNamePrefix]
-                        imageTag = deploymentConfig.region + "-docker.pkg.dev/" + deploymentConfig.project + "/anodiam-repo/" + appName + ":v" + env.BUILD_NUMBER
                     }
                 }
             }
@@ -64,13 +64,16 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                                             ])
                                     if(rollbackImageTag == "Build New Image") {
                                         imageTag = deploymentConfig.region + "-docker.pkg.dev/" + deploymentConfig.project + "/anodiam-repo/" + appName + ":v" + env.BUILD_NUMBER
+                                        buildRequired = true
                                     } else if(rollbackImageTag == "Another Image") {
                                         def rollbackCustomImageTag = input(id: 'rollbackCustomImageTag', message: 'Please Select Custom Image Tag to Rollback',
                                                 parameters: [[$class: 'StringParameterDefinition', description:'', name:'', defaultValue: currentImage]
                                                 ])
                                         imageTag = rollbackCustomImageTag
+                                        buildRequired = false
                                     } else {
                                         imageTag = rollbackImageTag
+                                        buildRequired = false
                                     }
                                     println("Selected app image = " + imageTag)
                                 } else {
@@ -83,6 +86,11 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
 
             }
             stage('Build Artifact') {
+                when {
+                    expression {
+                        return buildRequired;
+                    }
+                }
                 steps {
                     container("${buildPack}") {
                         sh("mkdir artifact")
@@ -111,6 +119,11 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                 }
             }
             stage('Build And Push Image') {
+                when {
+                    expression {
+                        return buildRequired;
+                    }
+                }
                 steps {
                     container('gcloud') {
                         sh("PYTHONUNBUFFERED=1 gcloud builds submit -t ${imageTag} ./artifact")
