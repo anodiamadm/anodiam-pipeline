@@ -59,8 +59,9 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                                 def user = err.getCauses()[0].getUser()
                                 if('SYSTEM' == user.toString()) { // SYSTEM means timeout.
                                     deploymentType = 'Deployment'
+                                    println("Timeout Receiving 'Deployment Type' Input - Proceeding with 'Deployment'")
                                 } else {
-                                    echo "Aborted by: [${user}]"
+                                    println("Aborted by: [" + user + "]")
                                 }
                             }
 
