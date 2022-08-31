@@ -56,17 +56,25 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                                 println("Selected deployment type = " + deploymentType)
                             } else {
                                 println("Selected deployment type = " + deploymentType)
-                                int status = sh(returnStatus: true, script: "kubectl get deployment " + appName + " -n ${deploymentConfig.namespace} -o=jsonpath='{\$.spec.template.spec.containers[:1].image}'")
-                                if(status == 0) {
-                                    def currentImage = sh(script: "kubectl get deployment " + appName + " -n ${deploymentConfig.namespace} -o=jsonpath='{\$.spec.template.spec.containers[:1].image}'", returnStdout: true)
+                                def currentImage = sh(script: "kubectl get deployment " + appName + " -n ${deploymentConfig.namespace} -o=jsonpath='{\$.spec.template.spec.containers[:1].image}' || true", returnStdout: true)
+                                if(!currentImage.startsWith('Error')) {
                                     println("Found app image = " + currentImage)
                                     def rollbackImageTag = input(id: 'rollbackImageTag', message: 'Please Select Image Tag to Rollback',
-                                                parameters: [[$class: 'ChoiceParameterDefinition', description:'', name:'', choices: "New Build" + "\n" + currentImage]
+                                            parameters: [[$class: 'ChoiceParameterDefinition', description:'', name:'', choices: "Build New Image" + "\n" + currentImage + "\nAnother Image"]
+                                            ])
+                                    if(rollbackImageTag == "Build New Image") {
+                                        imageTag = deploymentConfig.region + "-docker.pkg.dev/" + deploymentConfig.project + "/anodiam-repo/" + appName + ":v" + env.BUILD_NUMBER
+                                    } else if(rollbackImageTag == "Another Image") {
+                                        def rollbackCustomImageTag = input(id: 'rollbackCustomImageTag', message: 'Please Select Custom Image Tag to Rollback',
+                                                parameters: [[$class: 'StringParameterDefinition', description:'', name:'', defaultValue: currentImage]
                                                 ])
-                                        println("Selected app image = " + rollbackImageTag)
+                                        imageTag = rollbackCustomImageTag
+                                    } else {
+                                        imageTag = rollbackImageTag
+                                    }
+                                    println("Selected app image = " + imageTag)
                                 } else {
-                                    def errorMessage = sh(script: "kubectl get deployment " + appName + " -n ${deploymentConfig.namespace} -o=jsonpath='{\$.spec.template.spec.containers[:1].image}' || true", returnStdout: true)
-                                    error errorMessage
+                                    error currentImage
                                 }
                             }
                         }
