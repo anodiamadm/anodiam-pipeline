@@ -48,9 +48,21 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                     container('kubectl') {
                         sh("PYTHONUNBUFFERED=1 gcloud container clusters get-credentials ${deploymentConfig.cluster} --zone=${deploymentConfig.zone}")
                         script {
-                            def deploymentType = input(id: 'deploymentType', message: 'Please Select Deployment Type',
-                                    parameters: [[$class: 'ChoiceParameterDefinition', description:'', name:'', choices: "Deployment\nRollback"]
-                                    ])
+                            def deploymentType
+                            try {
+                                timeout(time: 5, unit: 'MINUTES') {
+                                    deploymentType = input(id: 'deploymentType', message: 'Please Select Deployment Type',
+                                            parameters: [[$class: 'ChoiceParameterDefinition', description:'', name:'', choices: "Deployment\nRollback"]
+                                            ])
+                                }
+                            } catch(err) {
+                                def user = err.getCauses()[0].getUser()
+                                if('SYSTEM' == user.toString()) { // SYSTEM means timeout.
+                                    deploymentType = 'Deployment'
+                                } else {
+                                    echo "Aborted by: [${user}]"
+                                }
+                            }
 
                             if(deploymentType == 'Deployment') {
                                 println("Selected deployment type = " + deploymentType)
