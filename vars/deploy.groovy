@@ -70,6 +70,7 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                                 imageTag = deploymentConfig.region + "-docker.pkg.dev/" + deploymentConfig.project + "/anodiam-repo/" + appName + ":v" + env.BUILD_NUMBER
                                 buildRequired = true
                             } else {
+                                buildRequired = false
                                 println("Selected deployment type = " + deploymentType)
                                 def currentImage = sh(script: "kubectl get deployment " + appName + " -n ${deploymentConfig.namespace} -o=jsonpath='{\$.spec.template.spec.containers[:1].image}' || true", returnStdout: true)
                                 def rollbackImageTag
@@ -92,10 +93,8 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                                             parameters: [[$class: 'StringParameterDefinition', description:'', name:'', defaultValue: defaultImageTagValue]
                                             ])
                                     imageTag = rollbackCustomImageTag
-                                    buildRequired = false
                                 } else {
                                     imageTag = rollbackImageTag
-                                    buildRequired = false
                                 }
                                 println("Selected app image = " + imageTag)
                             }
