@@ -76,17 +76,12 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                                 if(currentImage?.trim()) {
                                     println("Found app image = " + currentImage)
                                     rollbackImageTag = input(id: 'rollbackImageTag', message: 'Please Select Image Tag to Rollback',
-                                            parameters: [[$class: 'ChoiceParameterDefinition', description:'', name:'', choices: "Build New Image" + "\n" + currentImage + "\nAnother Image"]
+                                            parameters: [[$class: 'ChoiceParameterDefinition', description:'', name:'', choices: "" + currentImage + "\nAnother Image"]
                                             ])
                                 } else {
-                                    rollbackImageTag = input(id: 'rollbackImageTag', message: 'Please Select Image Tag to Rollback',
-                                            parameters: [[$class: 'ChoiceParameterDefinition', description:'', name:'', choices: "Build New Image\nAnother Image"]
-                                            ])
+                                    rollbackImageTag = 'Another Image'
                                 }
-                                if(rollbackImageTag == "Build New Image") {
-                                    imageTag = deploymentConfig.region + "-docker.pkg.dev/" + deploymentConfig.project + "/anodiam-repo/" + appName + ":v" + env.BUILD_NUMBER
-                                    buildRequired = true
-                                } else if(rollbackImageTag == "Another Image") {
+                                if(rollbackImageTag == "Another Image") {
                                     def defaultImageTagValue
                                     if(currentImage?.trim()) {
                                         defaultImageTagValue = currentImage.trim()
