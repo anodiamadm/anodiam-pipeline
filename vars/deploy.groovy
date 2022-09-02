@@ -155,9 +155,11 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                         script {
                             if ("${deploymentConfig.manifestDir}") {
                                 sh("sed -i.bak 's#APP_IMAGE#${imageTag}#' ${deploymentConfig.manifestDir}/*.yaml")
+                                sh("sed -i.bak 's#APP_NAMESPACE#${deploymentConfig.namespace}#' ${deploymentConfig.manifestDir}/*.yaml")
                                 sh("kubectl apply -n ${deploymentConfig.namespace} -f ${deploymentConfig.manifestDir}")
                             } else {
                                 sh("sed -i.bak 's#APP_IMAGE#${imageTag}#' ./k8s/*.yaml")
+                                sh("sed -i.bak 's#APP_NAMESPACE#${deploymentConfig.namespace}#' ./k8s/*.yaml")
                                 sh("kubectl apply -n ${deploymentConfig.namespace} -f ./k8s")
                             }
                         }
