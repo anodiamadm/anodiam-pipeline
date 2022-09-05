@@ -154,13 +154,17 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                         sh("PYTHONUNBUFFERED=1 gcloud container clusters get-credentials ${deploymentConfig.cluster} --zone=${deploymentConfig.zone}")
                         script {
                             if ("${deploymentConfig.manifestDir}") {
-                                sh("sed -i.bak 's#APP_IMAGE#${imageTag}#' ${deploymentConfig.manifestDir}/*.yaml")
-                                sh("sed -i.bak 's#APP_NAMESPACE#${deploymentConfig.namespace}#' ${deploymentConfig.manifestDir}/*.yaml")
-                                sh("kubectl apply -n ${deploymentConfig.namespace} -f ${deploymentConfig.manifestDir}")
+                                sh("sed -i.bak 's#APP_IMAGE#${imageTag}#' ${deploymentConfig.manifestDir}/base/*.yaml")
+                                sh("sed -i.bak 's#APP_IMAGE#${imageTag}#' ${deploymentConfig.manifestDir}/${deploymentConfig.env}/*.yaml")
+                                sh("sed -i.bak 's#APP_NAMESPACE#${deploymentConfig.namespace}#' ${deploymentConfig.manifestDir}/base/*.yaml")
+                                sh("sed -i.bak 's#APP_NAMESPACE#${deploymentConfig.namespace}#' ${deploymentConfig.manifestDir}/${deploymentConfig.env}/*.yaml")
+                                sh("kubectl apply -n ${deploymentConfig.namespace} -k ${deploymentConfig.manifestDir}/${deploymentConfig.env}")
                             } else {
-                                sh("sed -i.bak 's#APP_IMAGE#${imageTag}#' ./k8s/*.yaml")
-                                sh("sed -i.bak 's#APP_NAMESPACE#${deploymentConfig.namespace}#' ./k8s/*.yaml")
-                                sh("kubectl apply -n ${deploymentConfig.namespace} -f ./k8s")
+                                sh("sed -i.bak 's#APP_IMAGE#${imageTag}#' ./k8s/base/*.yaml")
+                                sh("sed -i.bak 's#APP_IMAGE#${imageTag}#' ./k8s/${deploymentConfig.env}/*.yaml")
+                                sh("sed -i.bak 's#APP_NAMESPACE#${deploymentConfig.namespace}#' ./k8s/base/*.yaml")
+                                sh("sed -i.bak 's#APP_NAMESPACE#${deploymentConfig.namespace}#' ./k8s/${deploymentConfig.env}/*.yaml")
+                                sh("kubectl apply -n ${deploymentConfig.namespace} -k ./k8s/${deploymentConfig.env}")
                             }
                         }
                     }
