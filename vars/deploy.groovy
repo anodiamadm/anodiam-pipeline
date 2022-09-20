@@ -114,7 +114,8 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                 steps {
                     container("${buildPack}") {
                         script {
-                            dependentLibs.each(lib - {
+                            for (int i=0; i< dependentLibs.size(); i++) {
+                                lib = dependentLibs.get(i)
                                 stage(lib.name + ' Build') {
                                     dir(lib.name) {
                                         git branch: lib.branch, url: lib.url, credentialsId: 'anodiamadm-github'
@@ -133,7 +134,7 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                                         }
                                     }
                                 }
-                            })
+                            }
                         }
                     }
                 }
