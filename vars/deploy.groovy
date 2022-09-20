@@ -111,7 +111,6 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                 }
                 steps {
                     container("${buildPack}") {
-                        workspace = ${env.WORKSPACE}
                         sh("mkdir dependency-ws")
                         dir("dependency-ws") {
                             git branch: 'main', url: 'https://github.com/anodiamadm/anodiam-security-commons.git'
@@ -129,7 +128,6 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                                 }
                             }
                         }
-                        dir(workspace)
                     }
                 }
             }
