@@ -113,24 +113,28 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                 }
                 steps {
                     container("${buildPack}") {
-                        dependentLibs.each(lib - {
-                            dir(lib.name) {
-                                git branch: lib.branch, url: lib.url, credentialsId: 'anodiamadm-github'
-                                script {
-                                    if('maven' == buildPack) {
-                                        sh("mvn clean install")
-                                    } else if('gradle' == buildPack) {
-                                        sh("gradle clean publishToMavenLocal")
-                                    } else if('npm' == buildPack) {
-                                        sh("npm install --omit=dev")
-                                        sh("npm run build")
-                                        sh("cp -r build/* dependency-ws")
-                                    } else {
-                                        error "Buildpack not defined/implemented"
+                        script {
+                            dependentLibs.each(lib - {
+                                stage(lib.name + ' Build') {
+                                    dir(lib.name) {
+                                        git branch: lib.branch, url: lib.url, credentialsId: 'anodiamadm-github'
+                                        script {
+                                            if('maven' == buildPack) {
+                                                sh("mvn clean install")
+                                            } else if('gradle' == buildPack) {
+                                                sh("gradle clean publishToMavenLocal")
+                                            } else if('npm' == buildPack) {
+                                                sh("npm install --omit=dev")
+                                                sh("npm run build")
+                                                sh("cp -r build/* dependency-ws")
+                                            } else {
+                                                error "Buildpack not defined/implemented"
+                                            }
+                                        }
                                     }
                                 }
-                            }
-                        })
+                            })
+                        }
                     }
                 }
             }
