@@ -113,7 +113,7 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                     container("${buildPack}") {
                         sh("mkdir dependency-ws")
                         dir("dependency-ws") {
-                            git branch: 'main', url: 'https://github.com/anodiamadm/anodiam-security-commons.git'
+                            git branch: 'main', url: 'https://github.com/anodiamadm/anodiam-security-commons.git', credentialsId: 'anodiamadm-github'
                             script {
                                 if('maven' == buildPack) {
                                     sh("mvn clean install")
