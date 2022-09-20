@@ -111,21 +111,18 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                 }
                 steps {
                     container("${buildPack}") {
-                        sh("mkdir dependency-ws")
-                        dir("dependency-ws") {
-                            git branch: 'main', url: 'https://github.com/anodiamadm/anodiam-security-commons.git', credentialsId: 'anodiamadm-github'
-                            script {
-                                if('maven' == buildPack) {
-                                    sh("mvn clean install")
-                                } else if('gradle' == buildPack) {
-                                    sh("gradle clean publishToMavenLocal")
-                                } else if('npm' == buildPack) {
-                                    sh("npm install --omit=dev")
-                                    sh("npm run build")
-                                    sh("cp -r build/* dependency-ws")
-                                } else {
-                                    error "Buildpack not defined/implemented"
-                                }
+                        git branch: 'main', url: 'https://github.com/anodiamadm/anodiam-security-commons.git', credentialsId: 'anodiamadm-github'
+                        script {
+                            if('maven' == buildPack) {
+                                sh("mvn clean install")
+                            } else if('gradle' == buildPack) {
+                                sh("gradle clean publishToMavenLocal")
+                            } else if('npm' == buildPack) {
+                                sh("npm install --omit=dev")
+                                sh("npm run build")
+                                sh("cp -r build/* dependency-ws")
+                            } else {
+                                error "Buildpack not defined/implemented"
                             }
                         }
                     }
