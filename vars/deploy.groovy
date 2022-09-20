@@ -108,7 +108,7 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
             stage('Build Dependencies') {
                 when {
                     expression {
-                        return buildRequired;
+                        return buildRequired && dependentLibs;
                     }
                 }
                 steps {
@@ -116,7 +116,7 @@ def call(String buildPack = 'maven', String appName = 'app-name-not-specified') 
                         script {
                             for (int i=0; i< dependentLibs.size(); i++) {
                                 lib = dependentLibs.get(i)
-                                stage(lib.name + ' Build') {
+                                stage(lib.name + ' - Build') {
                                     dir(lib.name) {
                                         git branch: lib.branch, url: lib.url, credentialsId: 'anodiamadm-github'
                                         script {
